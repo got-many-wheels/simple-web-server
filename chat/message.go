@@ -3,7 +3,9 @@ package main
 import "time"
 
 type message struct {
-	Email   string
-	Message string
-	When    time.Time
+	Name      string
+	Email     string
+	Message   string
+	When      time.Time
+	AvatarURL string
 }

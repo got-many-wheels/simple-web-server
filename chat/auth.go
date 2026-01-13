@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -56,8 +58,28 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, err)
 			return
 		}
+
+		// handle name fallback
+		name := strings.TrimSpace(user.Name)
+		if len(name) == 0 {
+			name = strings.TrimSpace(user.NickName)
+		}
+		if len(name) == 0 {
+			name = strings.TrimSpace(user.FirstName + " " + user.LastName)
+		}
+		if len(name) == 0 {
+			name = "<No Username>"
+		}
+
+		// hash email to be used as user id
+		m := md5.New()
+		io.WriteString(m, strings.ToLower(user.Email))
+		userId := fmt.Sprintf("%x", m.Sum(nil))
 		authCookieVal := objx.New(map[string]any{
-			"email": user.Email,
+			"userid":     userId,
+			"name":       name,
+			"email":      user.Email,
+			"avatar_url": user.AvatarURL,
 		}).MustBase64()
 
 		http.SetCookie(w, &http.Cookie{
