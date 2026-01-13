@@ -11,6 +11,12 @@ import (
 	"simple-web-server/trace"
 )
 
+var avatars = TryAvatars{
+	UseFileSystemAvatar("avatars"),
+	UseAuthAvatar,
+	UseGravatarAvatar,
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -26,7 +32,8 @@ func main() {
 		google.New(googleAuthClientID, googleAuthClientSecret, "http://localhost:8080/auth/callback/google", "email", "profile"),
 	)
 
-	r := newRoom(UseFileSystemAvatar("avatars"))
+	r := newRoom()
+
 	r.tracer = trace.New(os.Stdout) // allow debugging
 
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))

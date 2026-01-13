@@ -8,9 +8,28 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/stretchr/objx"
 )
+
+type ChatUser interface {
+	UniqueID() string
+	AvatarURL() string
+}
+
+type chatUser struct {
+	goth.User
+	uniqueId string
+}
+
+func (c chatUser) UniqueID() string {
+	return c.uniqueId
+}
+
+func (c chatUser) AvatarURL() string {
+	return c.User.AvatarURL
+}
 
 type authHandler struct {
 	next http.Handler
@@ -74,12 +93,19 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		// hash email to be used as user id
 		m := md5.New()
 		io.WriteString(m, strings.ToLower(user.Email))
-		userId := fmt.Sprintf("%x", m.Sum(nil))
+		uniqueId := fmt.Sprintf("%x", m.Sum(nil))
+
+		u := chatUser{user, uniqueId}
+		avatarUrl, err := avatars.GetAvatarURL(u)
+		if err != nil {
+			log.Fatalf("Error while trying to get the user avatar url %v", err)
+		}
+
 		authCookieVal := objx.New(map[string]any{
-			"userid":     userId,
+			"userid":     u.UniqueID(),
 			"name":       name,
-			"email":      user.Email,
-			"avatar_url": user.AvatarURL,
+			"email":      u.Email,
+			"avatar_url": avatarUrl,
 		}).MustBase64()
 
 		http.SetCookie(w, &http.Cookie{

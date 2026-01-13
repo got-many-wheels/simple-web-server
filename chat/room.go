@@ -46,7 +46,7 @@ func (r *room) run() {
 	}
 }
 
-func newRoom(avatar Avatar) *room {
+func newRoom() *room {
 	return &room{
 		forward: make(chan *message),
 		join:    make(chan *client),
@@ -54,7 +54,6 @@ func newRoom(avatar Avatar) *room {
 		clients: make(map[*client]bool),
 		// make tracer optional
 		tracer: trace.Off(),
-		avatar: avatar,
 	}
 }
 

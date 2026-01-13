@@ -30,10 +30,7 @@ func (c *client) read() {
 		msg.When = time.Now()
 		msg.Name = c.userData["name"].(string)
 		msg.Email = c.userData["email"].(string)
-		msg.AvatarURL, err = c.room.avatar.GetAvatarURL(c)
-		if err != nil {
-			c.room.tracer.Trace(err)
-		}
+		msg.AvatarURL = c.userData["avatar_url"].(string)
 		c.room.forward <- msg
 	}
 }
