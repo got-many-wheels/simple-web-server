@@ -11,8 +11,10 @@ import (
 	"simple-web-server/trace"
 )
 
+const AVATARS_FOLDER_PATH = "avatars"
+
 var avatars = TryAvatars{
-	UseFileSystemAvatar("avatars"),
+	UseFileSystemAvatar(AVATARS_FOLDER_PATH),
 	UseAuthAvatar,
 	UseGravatarAvatar,
 }
